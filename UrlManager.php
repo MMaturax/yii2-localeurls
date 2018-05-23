@@ -382,7 +382,7 @@ class UrlManager extends BaseUrlManager
                 }
                 if ($language === null) {
                     $language = $code;
-                    $this->redirectToLanguage($this->getDefaultLanguage());
+                    $this->redirectToLanguage($this->getDefaultLanguage()); //applied
                 }
             }
 
