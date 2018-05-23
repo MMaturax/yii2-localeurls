@@ -14,6 +14,7 @@ use yii\web\UrlNormalizerRedirectException;
  * from the URL or from browser settings transparently. It also can persist the
  * language in the user session and optionally in a cookie. It also adds the
  * language parameter to any created URL.
+ * test
  */
 class UrlManager extends BaseUrlManager
 {
