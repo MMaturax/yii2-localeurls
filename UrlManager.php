@@ -26,7 +26,7 @@ class UrlManager extends BaseUrlManager
      * mapping of <url_value> => <language>, e.g. 'english' => 'en'.
      */
     public $languages = [];
-    public $watchLanguages = [];
+    public $whiteListLanguages = [];
 
     /**
      * @var bool whether to enable locale URL specific features
@@ -344,7 +344,7 @@ class UrlManager extends BaseUrlManager
     {
         $pathInfo = $this->_request->getPathInfo();
         $parts = [];
-        foreach ($this->watchLanguages as $k => $v) {
+        foreach ($this->whiteListLanguages as $k => $v) {
             $value = is_string($k) ? $k : $v;
             if (substr($value, -2) === '-*') {
                 $lng = substr($value, 0, -2);
@@ -382,7 +382,6 @@ class UrlManager extends BaseUrlManager
                 }
                 if ($language === null) {
                     $language = $code;
-                    //if language not exists in languages, redirect to default language
                     $this->redirectToLanguage($this->getDefaultLanguage());
                 }
             }
