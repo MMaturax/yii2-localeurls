@@ -26,6 +26,7 @@ class UrlManager extends BaseUrlManager
      * mapping of <url_value> => <language>, e.g. 'english' => 'en'.
      */
     public $languages = [];
+    public $watchLanguages = [];
 
     /**
      * @var bool whether to enable locale URL specific features
@@ -343,7 +344,7 @@ class UrlManager extends BaseUrlManager
     {
         $pathInfo = $this->_request->getPathInfo();
         $parts = [];
-        foreach ($this->languages as $k => $v) {
+        foreach ($this->watchLanguages as $k => $v) {
             $value = is_string($k) ? $k : $v;
             if (substr($value, -2) === '-*') {
                 $lng = substr($value, 0, -2);
@@ -354,12 +355,21 @@ class UrlManager extends BaseUrlManager
             }
         }
         $pattern = implode('|', $parts);
+
+
+
+
         if (preg_match("#^($pattern)\b(/?)#i", $pathInfo, $m)) {
             $this->_request->setPathInfo(mb_substr($pathInfo, mb_strlen($m[1].$m[2])));
             $code = $m[1];
+
+
+
+
             if (isset($this->languages[$code])) {
                 // Replace alias with language code
                 $language = $this->languages[$code];
+
             } else {
                 // lowercase language, uppercase country
                 list($language,$country) = $this->matchCode($code);
@@ -372,8 +382,13 @@ class UrlManager extends BaseUrlManager
                 }
                 if ($language === null) {
                     $language = $code;
+                    //if language not exists in languages, redirect to default language
+                    $this->redirectToLanguage($this->getDefaultLanguage());
                 }
             }
+
+
+
             Yii::$app->language = $language;
             Yii::trace("Language code found in URL. Setting application language to '$language'.", __METHOD__);
             if ($this->enableLanguagePersistence) {
@@ -389,12 +404,15 @@ class UrlManager extends BaseUrlManager
             }
         } else {
             $language = null;
+
             if ($this->enableLanguagePersistence) {
                 $language = $this->loadPersistedLanguage();
             }
             if ($language === null) {
                 $language = $this->detectLanguage();
             }
+
+
             if ($language === null || $language === $this->_defaultLanguage) {
                 if (!$this->enableDefaultLanguageUrlCode) {
                     return;
@@ -402,6 +420,7 @@ class UrlManager extends BaseUrlManager
                     $language = $this->_defaultLanguage;
                 }
             }
+
             // #35: Only redirect if a valid language was found
             if ($this->matchCode($language) === [null, null]) {
                 return;
@@ -411,9 +430,11 @@ class UrlManager extends BaseUrlManager
             if ($key && is_string($key)) {
                 $language = $key;
             }
+
             if (!$this->keepUppercaseLanguageCode) {
                 $language = strtolower($language);
             }
+
             $this->redirectToLanguage($language);
         }
     }
@@ -585,6 +606,10 @@ class UrlManager extends BaseUrlManager
      */
     protected function redirectToLanguage($language)
     {
+
+
+
+
         try {
             $result = parent::parseRequest($this->_request);
         } catch (UrlNormalizerRedirectException $e) {
@@ -596,6 +621,10 @@ class UrlManager extends BaseUrlManager
                 $result = [$e->url, []];
             }
         }
+
+
+
+
         if ($result === false) {
             throw new \yii\web\NotFoundHttpException(Yii::t('yii', 'Page not found.'));
         }
@@ -603,14 +632,20 @@ class UrlManager extends BaseUrlManager
         if($language){
             $params[$this->languageParam] = $language;
         }
+
+
+
         // See Yii Issues #8291 and #9161:
         $params = $params + $this->_request->getQueryParams();
         array_unshift($params, $route);
         $url = $this->createUrl($params);
+
         // Required to prevent double slashes on generated URLs
         if ($this->suffix === '/' && $route === '' && count($params) === 1) {
             $url = rtrim($url, '/').'/';
         }
+
+
         // Prevent redirects to same URL which could happen in certain
         // UrlNormalizer / custom rule combinations
         if ($url === $this->_request->url) {
